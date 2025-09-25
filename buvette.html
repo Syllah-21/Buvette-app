@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Buvette - Compteur</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    .item {
+      background: #fff;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .count {
+      font-size: 1.5em;
+      margin: 0 10px;
+      width: 40px;
+      text-align: center;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    #total {
+      font-size: 1.4em;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+    #log {
+      margin-top: 30px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.9em;
+    }
+    .log-entry {
+      border-bottom: 1px solid #ddd;
+      padding: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Compteur Buvette</h1>
+
+  <div class="item">
+    <span>Bud (2€)</span>
+    <button onclick="decrement('bud',2)">-1</button>
+    <span class="count" id="bud">0</span>
+    <button onclick="increment('bud',2)">+1</button>
+  </div>
+  <div class="item">
+    <span>Despé (2€)</span>
+    <button onclick="decrement('despe',2)">-1</button>
+    <span class="count" id="despe">0</span>
+    <button onclick="increment('despe',2)">+1</button>
+  </div>
+  <div class="item">
+    <span>Leffe (2€)</span>
+    <button onclick="decrement('leffe',2)">-1</button>
+    <span class="count" id="leffe">0</span>
+    <button onclick="increment('leffe',2)">+1</button>
+  </div>
+  <div class="item">
+    <span>Café (1€)</span>
+    <button onclick="decrement('cafe',1)">-1</button>
+    <span class="count" id="cafe">0</span>
+    <button onclick="increment('cafe',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Coca (1€)</span>
+    <button onclick="decrement('coca',1)">-1</button>
+    <span class="count" id="coca">0</span>
+    <button onclick="increment('coca',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Eau (1€)</span>
+    <button onclick="decrement('eau',1)">-1</button>
+    <span class="count" id="eau">0</span>
+    <button onclick="increment('eau',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Ice Tea (1€)</span>
+    <button onclick="decrement('icetea',1)">-1</button>
+    <span class="count" id="icetea">0</span>
+    <button onclick="increment('icetea',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Oasis (1€)</span>
+    <button onclick="decrement('oasis',1)">-1</button>
+    <span class="count" id="oasis">0</span>
+    <button onclick="increment('oasis',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Orangina (1€)</span>
+    <button onclick="decrement('orangina',1)">-1</button>
+    <span class="count" id="orangina">0</span>
+    <button onclick="increment('orangina',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Schweppes (1€)</span>
+    <button onclick="decrement('schweppes',1)">-1</button>
+    <span class="count" id="schweppes">0</span>
+    <button onclick="increment('schweppes',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>KitKat (1€)</span>
+    <button onclick="decrement('kitkat',1)">-1</button>
+    <span class="count" id="kitkat">0</span>
+    <button onclick="increment('kitkat',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Mars (1€)</span>
+    <button onclick="decrement('mars',1)">-1</button>
+    <span class="count" id="mars">0</span>
+    <button onclick="increment('mars',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Snickers (1€)</span>
+    <button onclick="decrement('snickers',1)">-1</button>
+    <span class="count" id="snickers">0</span>
+    <button onclick="increment('snickers',1)">+1</button>
+  </div>
+  <div class="item">
+    <span>Twix (1€)</span>
+    <button onclick="decrement('twix',1)">-1</button>
+    <span class="count" id="twix">0</span>
+    <button onclick="increment('twix',1)">+1</button>
+  </div>
+
+  <div id="total">Total: 0 €</div>
+
+  <button onclick="saveResults()">💾 Sauvegarder résultats</button>
+  <button onclick="resetCounts()">🔄 Réinitialiser</button>
+
+  <div id="log"></div>
+
+  <script>
+    let counts = JSON.parse(localStorage.getItem("counts")) || {};
+    let total = parseInt(localStorage.getItem("total")) || 0;
+
+    function updateDisplay() {
+      for (let id in counts) {
+        document.getElementById(id).textContent = counts[id];
+      }
+      document.getElementById("total").textContent = "Total: " + total + " €";
+    }
+
+    function logAction(action) {
+      const log = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.textContent = new Date().toLocaleTimeString() + " - " + action;
+      log.prepend(entry);
+    }
+
+    function increment(id, price) {
+      counts[id] = (counts[id] || 0) + 1;
+      total += price;
+      localStorage.setItem("counts", JSON.stringify(counts));
+      localStorage.setItem("total", total);
+      updateDisplay();
+      logAction("+" + id + " ("+price+"€)");
+    }
+
+    function decrement(id, price) {
+      if ((counts[id] || 0) > 0) {
+        counts[id]--;
+        total -= price;
+        localStorage.setItem("counts", JSON.stringify(counts));
+        localStorage.setItem("total", total);
+        updateDisplay();
+        logAction("-" + id + " ("+price+"€)");
+      }
+    }
+
+    function resetCounts() {
+      counts = {};
+      total = 0;
+      localStorage.removeItem("counts");
+      localStorage.removeItem("total");
+      document.getElementById("log").innerHTML = "";
+      updateDisplay();
+    }
+
+    function saveResults() {
+      const date = new Date();
+      let filename = "buvette_" + date.toISOString().split("T")[0] + ".csv";
+      let csv = "Article,Quantité\n";
+      for (let id in counts) {
+        csv += id + "," + counts[id] + "\n";
+      }
+      csv += "Total," + total + "€\n";
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
